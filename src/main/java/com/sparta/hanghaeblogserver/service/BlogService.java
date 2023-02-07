@@ -57,4 +57,5 @@ public class BlogService {
     private boolean validatePassword(String tmpPwd, String memoPsw) {
         return tmpPwd.equals(memoPsw);
     }
+
 }
