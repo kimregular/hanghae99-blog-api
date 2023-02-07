@@ -24,4 +24,15 @@ public class BlogController {
     public List<Blog> getMemos() {
         return blogService.getMemos();
     }
+
+
+    @GetMapping("/posts/{id}")
+    public Blog getDetailMemo(@PathVariable Long id) {
+        return blogService.getDetailMemo(id);
+    }
+
+    @PutMapping("/posts/{id}")
+    public Blog updateMemo(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
+        return blogService.update(id, requestDto);
+    }
 }
