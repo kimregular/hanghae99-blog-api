@@ -31,12 +31,9 @@ public class BlogService {
 
     @Transactional
     public Blog getDetailMemo(Long id) {
-        Blog blog = blogRepository.findById(id).orElseThrow(
-//            () -> new IllegalArgumentException("해당 게시물 없음")
+        return blogRepository.findById(id).orElseThrow(
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시물없음")
         );
-
-        return blog;
     }
 
     @Transactional
@@ -53,9 +50,23 @@ public class BlogService {
 
     }
 
+    @Transactional
+    public Blog delete(Long id, BlogRequestDto requestDto) {
+        Blog blog = blogRepository.findById(id).orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시물 없음"));
+        if (validatePassword(blog.getPassword(), requestDto.getPassword())) {
+            blogRepository.delete(blog);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "비밀번호 오류");
+        }
+
+        return blog;
+    }
+
 
     private boolean validatePassword(String tmpPwd, String memoPsw) {
         return tmpPwd.equals(memoPsw);
     }
+
 
 }
