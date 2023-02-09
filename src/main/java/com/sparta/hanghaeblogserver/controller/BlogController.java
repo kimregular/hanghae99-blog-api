@@ -1,6 +1,7 @@
 package com.sparta.hanghaeblogserver.controller;
 
 import com.sparta.hanghaeblogserver.dto.BlogRequestDto;
+import com.sparta.hanghaeblogserver.dto.BlogResponseDto;
 import com.sparta.hanghaeblogserver.entity.Blog;
 import com.sparta.hanghaeblogserver.service.BlogService;
 import lombok.RequiredArgsConstructor;
@@ -21,23 +22,25 @@ public class BlogController {
     }
 
     @GetMapping("/posts")
-    public List<Blog> getMemos() {
+    public List<BlogResponseDto> getMemos() {
+
         return blogService.getMemos();
     }
 
 
     @GetMapping("/posts/{id}")
-    public Blog getDetailMemo(@PathVariable Long id) {
+    public BlogResponseDto getDetailMemo(@PathVariable Long id) {
+
         return blogService.getDetailMemo(id);
     }
 
     @PutMapping("/posts/{id}")
-    public Blog updateMemo(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
+    public BlogResponseDto updateMemo(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
         return blogService.update(id, requestDto);
     }
 
     @DeleteMapping("/posts/{id}")
-    public Blog deleteMemo(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
+    public Long deleteMemo(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
         return blogService.delete(id, requestDto);
     }
 }

@@ -1,6 +1,7 @@
 package com.sparta.hanghaeblogserver.service;
 
 import com.sparta.hanghaeblogserver.dto.BlogRequestDto;
+import com.sparta.hanghaeblogserver.dto.BlogResponseDto;
 import com.sparta.hanghaeblogserver.entity.Blog;
 import com.sparta.hanghaeblogserver.repository.BlogRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,19 +27,25 @@ public class BlogService {
     }
 
     @Transactional(readOnly = true)
-    public List<Blog> getMemos() {
-        return blogRepository.findAllByOrderByCreateAtDesc();
+    public List<BlogResponseDto> getMemos() {
+        List<Blog> blogList = blogRepository.findAllByOrderByCreateAtDesc();
+        List<BlogResponseDto> responseDtos = new ArrayList<>();
+        for (Blog blog : blogList) {
+            responseDtos.add(new BlogResponseDto(blog));
+        }
+        return responseDtos;
     }
 
     @Transactional
-    public Blog getDetailMemo(Long id) {
-        return blogRepository.findById(id).orElseThrow(
+    public BlogResponseDto getDetailMemo(Long id) {
+        Blog blog = blogRepository.findById(id).orElseThrow(
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시물없음")
         );
+        return new BlogResponseDto(blog);
     }
 
     @Transactional
-    public Blog update(Long id, BlogRequestDto requestDto) {
+    public BlogResponseDto update(Long id, BlogRequestDto requestDto) {
         Blog blog = blogRepository.findById(id).orElseThrow(
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시물 없음")
         );
@@ -46,12 +54,12 @@ public class BlogService {
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "비밀번호 오류");
         }
-        return blog;
+        return new BlogResponseDto(blog);
 
     }
 
     @Transactional
-    public Blog delete(Long id, BlogRequestDto requestDto) {
+    public Long delete(Long id, BlogRequestDto requestDto) {
         Blog blog = blogRepository.findById(id).orElseThrow(
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시물 없음"));
         if (validatePassword(blog.getPassword(), requestDto.getPassword())) {
@@ -60,7 +68,7 @@ public class BlogService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "비밀번호 오류");
         }
 
-        return blog;
+        return id;
     }
 
 
