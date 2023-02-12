@@ -29,7 +29,7 @@ public class BlogController {
 
 
     @GetMapping("/posts/{id}")
-    public BlogResponseDto getDetailMemo(@PathVariable Long id) {
+    public BlogResponseDto getMemo(@PathVariable Long id) {
 
         return blogService.getDetailMemo(id);
     }
