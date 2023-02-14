@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @Controller
@@ -23,15 +24,15 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/signup")
-    public HttpEntity<String> signup(@RequestBody @Valid SignupRequestDto signupRequestDto) {
+    public HttpEntity<String> signup(@Valid @RequestBody SignupRequestDto signupRequestDto) {
 
         userService.signup(signupRequestDto);
         return new ResponseEntity<String>("ok", HttpStatus.OK);
     }
 
     @PostMapping("/login")
-    public HttpEntity<String> login(@RequestBody LoginRequestDto loginRequestDto) {
-        userService.login(loginRequestDto);
+    public HttpEntity<String> login(@RequestBody LoginRequestDto loginRequestDto, HttpServletResponse response) {
+        userService.login(loginRequestDto, response);
         return new ResponseEntity<String>("ok", HttpStatus.OK);
     }
 

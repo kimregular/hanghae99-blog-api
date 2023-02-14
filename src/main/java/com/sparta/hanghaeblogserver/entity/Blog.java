@@ -12,39 +12,28 @@ import javax.persistence.*;
 public class Blog extends Timestamped {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
-    private String writer;
 
     @Column(nullable = false)
     private String content;
 
+
     @Column(nullable = false)
-    private String password;
+    private Long userId;
 
-    public Blog(String title, String writer, String content, String password) {
-        this.title = title;
-        this.writer = writer;
-        this.content = content;
-        this.password = password;
-    }
-
-    public Blog(BlogRequestDto requestDto) {
+    public Blog(BlogRequestDto requestDto, Long userId) {
         this.title = requestDto.getTitle();
-        this.writer = requestDto.getWriter();
         this.content = requestDto.getContent();
-        this.password = requestDto.getPassword();
+        this.userId = userId;
     }
 
     public void update(BlogRequestDto requestDto) {
         this.title = requestDto.getTitle();
-        this.writer = requestDto.getWriter();
         this.content = requestDto.getContent();
-        this.password = requestDto.getPassword();
     }
 }
