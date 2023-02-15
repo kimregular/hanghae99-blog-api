@@ -1,7 +1,9 @@
 package com.sparta.hanghaeblogserver.service;
 
-import com.sparta.hanghaeblogserver.dto.LoginRequestDto;
-import com.sparta.hanghaeblogserver.dto.SignupRequestDto;
+import com.sparta.hanghaeblogserver.dto.request.LoginRequestDto;
+import com.sparta.hanghaeblogserver.dto.request.SignupRequestDto;
+import com.sparta.hanghaeblogserver.dto.response.ResponseDto;
+import com.sparta.hanghaeblogserver.dto.response.UserResponseDto;
 import com.sparta.hanghaeblogserver.entity.User;
 import com.sparta.hanghaeblogserver.jwt.JwtUtil;
 import com.sparta.hanghaeblogserver.repository.UserRepository;
@@ -21,23 +23,37 @@ public class UserService {
 
 
     @Transactional
-    public void signup(SignupRequestDto signupRequestDto) {
+    public ResponseDto<UserResponseDto> signup(SignupRequestDto signupRequestDto) {
         String username = signupRequestDto.getUsername();
-        String password = signupRequestDto.getPassword();
-        String email = signupRequestDto.getEmail();
 
         // 회원 중복 확인
         Optional<User> found = userRepository.findByUsername(username);
         if (found.isPresent()) {
-            throw new IllegalArgumentException("중복된 사용자가 존재합니다.");
+            return ResponseDto.fail("DUPLICATED_USERNAME", "중복된 이름입니다.");
         }
 
-        User user = new User(username, password, email);
+        User user = User.builder()
+            .username(signupRequestDto.getUsername())
+            .password(signupRequestDto.getPassword())
+            .email(signupRequestDto.getEmail())
+            .build();
+
         userRepository.save(user);
+
+         ResponseDto responseDto = ResponseDto.success(
+            UserResponseDto.builder()
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .email(user.getEmail())
+                .build()
+        );
+        return responseDto;
     }
 
+
+
     @Transactional(readOnly = true)
-    public void login(LoginRequestDto loginRequestDto, HttpServletResponse response) {
+    public ResponseDto<?> login(LoginRequestDto loginRequestDto, HttpServletResponse response) {
         String username = loginRequestDto.getUsername();
         String password = loginRequestDto.getPassword();
 
@@ -52,5 +68,13 @@ public class UserService {
         }
 
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(user.getUsername()));
+
+        return ResponseDto.success(
+            UserResponseDto.builder()
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .build()
+        );
     }
+
 }

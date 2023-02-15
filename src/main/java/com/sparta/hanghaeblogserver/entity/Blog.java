@@ -1,14 +1,18 @@
 package com.sparta.hanghaeblogserver.entity;
 
-import com.sparta.hanghaeblogserver.dto.BlogRequestDto;
+import com.sparta.hanghaeblogserver.dto.request.BlogRequestDto;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Getter
+@Builder
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 public class Blog extends Timestamped {
 
     @Id
@@ -25,11 +29,6 @@ public class Blog extends Timestamped {
     @ManyToOne
     private User user;
 
-    public Blog(BlogRequestDto requestDto, User user) {
-        this.title = requestDto.getTitle();
-        this.content = requestDto.getContent();
-        this.user = user;
-    }
 
     public void update(BlogRequestDto requestDto) {
         this.title = requestDto.getTitle();
