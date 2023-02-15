@@ -23,7 +23,7 @@ public class UserService {
 
 
     @Transactional
-    public ResponseDto<?> signup(SignupRequestDto signupRequestDto) {
+    public ResponseDto<UserResponseDto> signup(SignupRequestDto signupRequestDto) {
         String username = signupRequestDto.getUsername();
 
         // 회원 중복 확인
@@ -40,14 +40,17 @@ public class UserService {
 
         userRepository.save(user);
 
-        return ResponseDto.success(
+         ResponseDto responseDto = ResponseDto.success(
             UserResponseDto.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .email(user.getEmail())
                 .build()
         );
+        return responseDto;
     }
+
+
 
     @Transactional(readOnly = true)
     public ResponseDto<?> login(LoginRequestDto loginRequestDto, HttpServletResponse response) {
