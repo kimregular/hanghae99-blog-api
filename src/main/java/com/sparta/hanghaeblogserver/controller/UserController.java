@@ -1,12 +1,10 @@
 package com.sparta.hanghaeblogserver.controller;
 
-import com.sparta.hanghaeblogserver.dto.LoginRequestDto;
-import com.sparta.hanghaeblogserver.dto.SignupRequestDto;
+import com.sparta.hanghaeblogserver.dto.request.LoginRequestDto;
+import com.sparta.hanghaeblogserver.dto.request.SignupRequestDto;
+import com.sparta.hanghaeblogserver.dto.response.ResponseDto;
 import com.sparta.hanghaeblogserver.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,20 +18,16 @@ import javax.validation.Valid;
 @RequestMapping("/api/user")
 public class UserController {
 
-
     private final UserService userService;
 
     @PostMapping("/signup")
-    public HttpEntity<String> signup(@Valid @RequestBody SignupRequestDto signupRequestDto) {
-
-        userService.signup(signupRequestDto);
-        return new ResponseEntity<String>("ok", HttpStatus.OK);
+    public ResponseDto<?> signup(@Valid @RequestBody SignupRequestDto requestDto) {
+        return userService.signup(requestDto);
     }
 
     @PostMapping("/login")
-    public HttpEntity<String> login(@RequestBody LoginRequestDto loginRequestDto, HttpServletResponse response) {
-        userService.login(loginRequestDto, response);
-        return new ResponseEntity<String>("ok", HttpStatus.OK);
+    public ResponseDto<?> login(@RequestBody LoginRequestDto loginRequestDto, HttpServletResponse response) {
+        return userService.login(loginRequestDto, response);
     }
 
 }
