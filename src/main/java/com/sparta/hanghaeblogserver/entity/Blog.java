@@ -24,7 +24,7 @@ public class Blog extends Timestamped {
 
 
     @Column(nullable = false)
-    private Long userId;
+    private Long userId; // -> user로 받아도 된다.
 
     public Blog(BlogRequestDto requestDto, Long userId) {
         this.title = requestDto.getTitle();
