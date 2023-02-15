@@ -22,14 +22,13 @@ public class Blog extends Timestamped {
     @Column(nullable = false)
     private String content;
 
+    @ManyToOne
+    private User user;
 
-    @Column(nullable = false)
-    private Long userId;
-
-    public Blog(BlogRequestDto requestDto, Long userId) {
+    public Blog(BlogRequestDto requestDto, User user) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
-        this.userId = userId;
+        this.user = user;
     }
 
     public void update(BlogRequestDto requestDto) {

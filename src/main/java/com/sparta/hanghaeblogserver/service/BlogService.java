@@ -47,8 +47,8 @@ public class BlogService {
             );
 
             // 요청받은 DTO로 DB에 저장할 객체 만들기
-            Blog blog = blogRepository.saveAndFlush(new Blog(requestDto, user.getId()));
-            return new BlogResponseDto(blog, user);
+            Blog blog = blogRepository.saveAndFlush(new Blog(requestDto, user));
+            return new BlogResponseDto(blog);
         } else {
             return null;
         }
@@ -97,7 +97,7 @@ public class BlogService {
 
             blog.update(requestDto);
 
-            return new BlogResponseDto(blog, user);
+            return new BlogResponseDto(blog);
         }
         return null;
 
