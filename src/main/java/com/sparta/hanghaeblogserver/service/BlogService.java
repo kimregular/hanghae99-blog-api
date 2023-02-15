@@ -1,7 +1,8 @@
 package com.sparta.hanghaeblogserver.service;
 
-import com.sparta.hanghaeblogserver.dto.BlogRequestDto;
-import com.sparta.hanghaeblogserver.dto.BlogResponseDto;
+import com.sparta.hanghaeblogserver.dto.request.BlogRequestDto;
+import com.sparta.hanghaeblogserver.dto.response.BlogResponseDto;
+import com.sparta.hanghaeblogserver.dto.response.ResponseDto;
 import com.sparta.hanghaeblogserver.entity.Blog;
 import com.sparta.hanghaeblogserver.entity.User;
 import com.sparta.hanghaeblogserver.jwt.JwtUtil;
@@ -15,8 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +26,7 @@ public class BlogService {
     private final JwtUtil jwtUtil;
 
     @Transactional
-    public BlogResponseDto createMemo(BlogRequestDto requestDto, HttpServletRequest request) {
+    public ResponseDto<?> createMemo(BlogRequestDto requestDto, HttpServletRequest request) {
         // request에서 Token 가져오기
         String token = jwtUtil.resolveToken(request);
         Claims claims;
@@ -47,33 +46,51 @@ public class BlogService {
             );
 
             // 요청받은 DTO로 DB에 저장할 객체 만들기
-            Blog blog = blogRepository.saveAndFlush(new Blog(requestDto, user));
-            return new BlogResponseDto(blog);
-        } else {
-            return null;
+            Blog blog = Blog.builder()
+                .title(requestDto.getTitle())
+                .content(requestDto.getContent())
+                .user(user)
+                .build();
+
+            blogRepository.saveAndFlush(blog);
+
+            return ResponseDto.success(
+                BlogResponseDto.builder()
+                    .title(blog.getTitle())
+                    .content(blog.getContent())
+                    .writer(user.getUsername())
+                    .createAt(blog.getCreateAt())
+                    .build()
+            );
+
+
         }
+        return ResponseDto.fail("BAD_REQUEST", "잘못된 요청입니다.");
     }
 
     @Transactional(readOnly = true)
-    public List<BlogResponseDto> getMemos() {
-        List<Blog> blogList = blogRepository.findAllByOrderByCreateAtDesc();
-        List<BlogResponseDto> responseDtos = new ArrayList<>();
-        for (Blog blog : blogList) {
-            responseDtos.add(new BlogResponseDto(blog));
-        }
-        return responseDtos;
+    public ResponseDto<?> getMemos() {
+        return ResponseDto.success(blogRepository.findAllByOrderByCreateAtDesc());
     }
 
     @Transactional
-    public BlogResponseDto getMemo(Long id) {
+    public ResponseDto<?> getMemo(Long id) {
         Blog blog = blogRepository.findById(id).orElseThrow(
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시물없음")
         );
-        return new BlogResponseDto(blog);
+
+        return ResponseDto.success(
+            BlogResponseDto.builder()
+                .title(blog.getTitle())
+                .writer(blog.getUser().getUsername())
+                .content(blog.getContent())
+                .createAt(blog.getCreateAt())
+                .build()
+        );
     }
 
     @Transactional
-    public BlogResponseDto update(Long id, BlogRequestDto requestDto, HttpServletRequest request) {
+    public ResponseDto<?> update(Long id, BlogRequestDto requestDto, HttpServletRequest request) {
         // request에서 토큰 가져오기
         String token = jwtUtil.resolveToken(request);
         Claims claims;
@@ -97,14 +114,14 @@ public class BlogService {
 
             blog.update(requestDto);
 
-            return new BlogResponseDto(blog);
+            return ResponseDto.success(blog);
         }
         return null;
 
     }
 
     @Transactional
-    public void delete(Long id,BlogRequestDto requestDto, HttpServletRequest request) {
+    public ResponseDto<?> delete(Long id, HttpServletRequest request) {
 
         // request에서 토큰 가져오기
         String token = jwtUtil.resolveToken(request);
@@ -126,13 +143,14 @@ public class BlogService {
             Blog blog = blogRepository.findByIdAndUserId(id, user.getId()).orElseThrow(
                     () -> new NullPointerException("해당 게시물은 존재하지 않습니다.")
             );
-            if (blog.getId().equals(user.getId())) {
-                blogRepository.delete(blog);
-            } else {
+            if (!blog.getId().equals(user.getId())) {
                 throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
+
+            } else {
+                blogRepository.delete(blog);
+                return ResponseDto.success("delete success");
             }
         }
+        return null;
     }
-
-
 }

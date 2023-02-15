@@ -1,28 +1,25 @@
-package com.sparta.hanghaeblogserver.dto;
+package com.sparta.hanghaeblogserver.dto.response;
 
 import com.sparta.hanghaeblogserver.entity.Blog;
 import com.sparta.hanghaeblogserver.entity.User;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class BlogResponseDto {
 
     private String title;
     private String content;
     private LocalDateTime createAt;
     private String writer;
-
-
-    public BlogResponseDto(Blog blog) {
-        this.title = blog.getTitle();
-        this.content = blog.getContent();
-        this.createAt = blog.getCreateAt();
-        this.writer = blog.getUser().getUsername();
-    }
-
 
 }
 

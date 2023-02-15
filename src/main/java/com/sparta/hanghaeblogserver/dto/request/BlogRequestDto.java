@@ -1,4 +1,4 @@
-package com.sparta.hanghaeblogserver.dto;
+package com.sparta.hanghaeblogserver.dto.request;
 
 import lombok.Getter;
 
