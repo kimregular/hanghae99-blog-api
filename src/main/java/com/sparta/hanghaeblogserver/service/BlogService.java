@@ -104,7 +104,7 @@ public class BlogService {
     }
 
     @Transactional
-    public Long delete(Long id, HttpServletRequest request) {
+    public void delete(Long id,BlogRequestDto requestDto, HttpServletRequest request) {
 
         // request에서 토큰 가져오기
         String token = jwtUtil.resolveToken(request);
@@ -126,11 +126,12 @@ public class BlogService {
             Blog blog = blogRepository.findByIdAndUserId(id, user.getId()).orElseThrow(
                     () -> new NullPointerException("해당 게시물은 존재하지 않습니다.")
             );
-
-            blogRepository.delete(blog);
-            return id;
+            if (blog.getId().equals(user.getId())) {
+                blogRepository.delete(blog);
+            } else {
+                throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
+            }
         }
-        return null;
     }
 
 
