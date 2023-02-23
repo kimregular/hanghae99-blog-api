@@ -8,7 +8,7 @@ import java.util.Optional;
 
 
 public interface BlogRepository extends JpaRepository<Blog, Long> {
-    List<Blog> findAllByOrderByCreateAtDesc();
+
 
     Optional<Blog> findByIdAndUserId(Long id, Long userId);
 }

@@ -5,9 +5,11 @@ import com.sparta.hanghaeblogserver.dto.request.SignupRequestDto;
 import com.sparta.hanghaeblogserver.dto.response.ResponseDto;
 import com.sparta.hanghaeblogserver.dto.response.UserResponseDto;
 import com.sparta.hanghaeblogserver.entity.User;
+import com.sparta.hanghaeblogserver.entity.UserRoleEnum;
 import com.sparta.hanghaeblogserver.jwt.JwtUtil;
 import com.sparta.hanghaeblogserver.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,36 +22,44 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
+    private static final String ADMIN_TOKEN = "AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC";
 
 
     @Transactional
     public ResponseDto<UserResponseDto> signup(SignupRequestDto signupRequestDto) {
-        String username = signupRequestDto.getUsername();
 
-        // 회원 중복 확인
-        Optional<User> found = userRepository.findByUsername(username);
+        String password = passwordEncoder.encode(signupRequestDto.getPassword());
+
+        Optional<User> found = userRepository.findByUsername(signupRequestDto.getUsername());
+
         if (found.isPresent()) {
-            return ResponseDto.fail("DUPLICATED_USERNAME", "중복된 이름입니다.");
+            throw new IllegalArgumentException("중복된 회원 이름입니다.");
         }
+
+        UserRoleEnum role = UserRoleEnum.USER;
+
+        if (signupRequestDto.isAdmin()) {
+            if (!signupRequestDto.getAdminToken().equals(ADMIN_TOKEN)) {
+                throw new IllegalArgumentException("관리자 암호가 틀려 등록이 불가능합니다.");
+            }
+            role = UserRoleEnum.ADMIN;
+        }
+
 
         User user = User.builder()
             .username(signupRequestDto.getUsername())
-            .password(signupRequestDto.getPassword())
+            .password(password)
             .email(signupRequestDto.getEmail())
+            .role(role)
             .build();
-
         userRepository.save(user);
-
-         ResponseDto responseDto = ResponseDto.success(
-            UserResponseDto.builder()
-                .username(user.getUsername())
-                .password(user.getPassword())
-                .email(user.getEmail())
-                .build()
-        );
-        return responseDto;
+        return ResponseDto.success(UserResponseDto.builder()
+            .username(user.getUsername())
+            .password(user.getPassword())
+            .email(user.getEmail())
+            .build());
     }
-
 
 
     @Transactional(readOnly = true)
@@ -63,17 +73,17 @@ public class UserService {
         );
 
         // 비밀번호 확인
-        if(!user.getPassword().equals(password)){
-            throw  new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(user.getUsername()));
+        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(user.getUsername(), user.getRole()));
 
-        return ResponseDto.success(
-            UserResponseDto.builder()
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .build()
+        return ResponseDto.success(UserResponseDto.builder()
+            .username(user.getUsername())
+            .password(user.getPassword())
+            .email(user.getEmail())
+            .build()
         );
     }
 

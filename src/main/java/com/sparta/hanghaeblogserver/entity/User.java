@@ -28,11 +28,15 @@ public class User {
     private String username;
 
     @Column(nullable = false)
-    @Size(min=8, max=15, message = "비밀번호는 8자 이상, 15자 이하만 가능합니다.")
-    @Pattern(regexp = "^[a-zA-Z0-9]+$")
+//    @Size(min = 8, max = 15, message = "비밀번호는 8자 이상, 15자 이하만 가능합니다.")
+//    @Pattern(regexp = "^[a-zA-Z0-9]+$")
     private String password;
 
     @Column(nullable = false, unique = true)
     @Pattern(regexp = "^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$")
     private String email;
+
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private UserRoleEnum role;
 }

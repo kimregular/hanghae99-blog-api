@@ -1,6 +1,7 @@
 package com.sparta.hanghaeblogserver.entity;
 
 import com.sparta.hanghaeblogserver.dto.request.BlogRequestDto;
+import com.sparta.hanghaeblogserver.dto.response.BlogResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,6 +30,12 @@ public class Blog extends Timestamped {
     @ManyToOne
     private User user;
 
+    @Builder
+    public Blog(BlogRequestDto requestDto, User user) {
+        this.title = requestDto.getTitle();
+        this.content = requestDto.getContent();
+        this.user = user;
+    }
 
     public void update(BlogRequestDto requestDto) {
         this.title = requestDto.getTitle();

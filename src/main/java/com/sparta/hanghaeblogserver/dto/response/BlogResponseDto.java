@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.OrderBy;
 import java.time.LocalDateTime;
 
 
@@ -20,9 +21,18 @@ public class BlogResponseDto {
 
     private String title;
     private String content;
+
+    @OrderBy
     private LocalDateTime createAt;
     private String writer;
 
+    @Builder
+    public BlogResponseDto(Blog blog) {
+        this.title = blog.getTitle();
+        this.content = blog.getContent();
+        this.createAt = blog.getCreateAt();
+        this.writer = blog.getUser().getUsername();
+    }
 }
 
 /*

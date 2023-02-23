@@ -1,11 +1,16 @@
 package com.sparta.hanghaeblogserver.jwt;
 
+import com.sparta.hanghaeblogserver.entity.UserRoleEnum;
+import com.sparta.hanghaeblogserver.security.UserDetailsServiceImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -26,7 +31,7 @@ public class JwtUtil {
     // 토큰 생성에 필요한 값
     // header 키 값
 
-//    public static final String AUTHORIZATION_KEY = "auth";
+    public static final String AUTHORIZATION_KEY = "auth";
 //    // 사용자 권한 값의 key
 
     private static final String BEARER_PREFIX = "Bearer ";
@@ -39,6 +44,8 @@ public class JwtUtil {
     private String secretKey;
     private Key key;
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+
+    private final UserDetailsServiceImpl userDetailsService;
 
     @PostConstruct
     public void init() {
@@ -61,12 +68,13 @@ public class JwtUtil {
     }
 
     // 토큰 생성
-    public String createToken(String username) {
+    public String createToken(String username, UserRoleEnum role) {
         Date date = new Date();
 
         return BEARER_PREFIX +
                 Jwts.builder()
                         .setSubject(username)
+                        .claim(AUTHORIZATION_KEY, role)
                         .setExpiration(new Date(date.getTime() + TOKEN_TIME))
                         .setIssuedAt(date)
                         .signWith(key, signatureAlgorithm)
@@ -93,6 +101,11 @@ public class JwtUtil {
     // 토큰에서 사용자 정보 가져오기
     public Claims getUserInfoFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+    }
+
+    public Authentication createAuthentication(String username) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 
 }
